@@ -24,10 +24,101 @@ function preload() {
 }
 
 function create() {
-	game.add.sprite(0,0,'star');
+	// going to be using a physics engine, so enable the Aracde Phsics system
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	//background
+	game.add.sprite(0,0,'sky');
+
+	//group of platforms to jump around on
+	platforms = game.add.group();
+
+	//enable physics for nay object that is created within this group
+	platforms.enableBody = true;
+
+	//create the ground here
+	var ground = platforms.create(0, game.world.height - 64, 'ground') ;
+
+	//scale the ground to fit the width of the game
+	ground.scale.setTo(2,2);
+
+	//stops the ground from moving when jumped on
+	ground.body.immovable = true;
+
+	//create the two ledges 
+	var ledge = platforms.create(400,400, 'ground');
+
+	// the ledges are also not moveable
+	ledge.body.immovable = true;
+
+	//create the two ledges 
+	ledge = platforms.create(-150,200, 'ground');
+
+	ledge.body.immovable = true;
+
+	//creating the player!
+	player = game.add.sprite(32, game.world.height - 150, 'dude');
+
+	//enable physics on the player 
+	game.physics.arcade.enable(player);
+
+	// player's physical properties, and give him a slight bounce
+	player.body.bounce.y = .2;
+	player.body.gravity.y = 300;
+	player.body.collideWorldBounds = true;
+
+	//our two walking animations 
+	player.animations.add('left', [0, 1, 2, 3], 10, true);
+	//uses frames 0,1,2,3 of the sprite sheet and makes them run at 10 frames per second. "true" tells it to loop after that 
+	player.animations.add('right', [5, 6, 7, 8], 10, true);
+
+	//create a group about the stars
+	stars = game.add.group();
+
+	stars.enableBody = true;
+
+	//add physics to the star group 
+
+
+
 }
 
-function update() {
+// update function is called every single loop to perform its functions!
+function update() { 
+	// collide the player and stars with the platforms group
+	game.physics.arcade.collide(player, platforms);
+	// this will guarantee that they will collide and stop at their collision point 
+
+	//reset the players velocity to nothing
+	player.body.velocity.x = 0;
+
+	//this will allow us to use the four directional arrow keys for the game mechanics 
+	cursors = game.input.keyboard.createCursorKeys();
+
+	if (cursors.left.isDown){
+		//move to the left
+		player.body.velocity.x = -150;
+		// play the sprite sheet loop 
+		player.animations.play('left');
+	}
+	else if (cursors.right.isDown){
+		//move to the right
+		player.body.velocity.x = 150;
+
+		player.animations.play('right');
+	}
+	else{
+		// stand still
+		player.animations.stop();
+
+		//frame 4 is the player staring right at the player idly 
+		player.frame = 4; 
+	}
+
+	// allows the player to jump if they are touching the ground
+	if (cursors.up.isDown && player.body.touching.down){
+		player.body.velocity.y = -350;
+	}
 }
 
 </script>
